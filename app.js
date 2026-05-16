@@ -5,73 +5,75 @@ const SSEChannel = require('sse-pubsub');
 const crypto = require('crypto');
 
 var forza = new Parser().endianess("little")
-    .int32('IsRaceOn') // = 1 when race is on. = 0 when in menus/race stopped …
-    .uint32('TimestampMS') //Can overflow to 0 eventually
+    .int32('IsRaceOn') 
+    .uint32('TimestampMS') 
     .floatle('EngineMaxRpm')
     .floatle('EngineIdleRpm')
     .floatle('CurrentEngineRpm')
-    .floatle('AccelerationX') //In the car's local space; X = right, Y = up, Z = forward
+    .floatle('AccelerationX') 
     .floatle('AccelerationY')
     .floatle('AccelerationZ')
-    .floatle('VelocityX') //In the car's local space; X = right, Y = up, Z = forward
+    .floatle('VelocityX') 
     .floatle('VelocityY')
     .floatle('VelocityZ')
-    .floatle('AngularVelocityX') //In the car's local space; X = pitch, Y = yaw, Z = roll
+    .floatle('AngularVelocityX') 
     .floatle('AngularVelocityY')
     .floatle('AngularVelocityZ')
     .floatle('Yaw')
     .floatle('Pitch')
     .floatle('Roll')
-    .floatle('NormalizedSuspensionTravelFrontLeft') // Suspension travel normalized: 0.0f = max stretch; 1.0 = max compression
+    .floatle('NormalizedSuspensionTravelFrontLeft') 
     .floatle('NormalizedSuspensionTravelFrontRight')
     .floatle('NormalizedSuspensionTravelRearLeft')
     .floatle('NormalizedSuspensionTravelRearRight')
-    .floatle('TireSlipRatioFrontLeft') // Tire normalized slip ratio, = 0 means 100% grip and |ratio| > 1.0 means loss of grip.
+    .floatle('TireSlipRatioFrontLeft') 
     .floatle('TireSlipRatioFrontRight')
     .floatle('TireSlipRatioRearLeft')
     .floatle('TireSlipRatioRearRight')
-    .floatle('WheelRotationSpeedFrontLeft') // Wheel rotation speed radians/sec.
+    .floatle('WheelRotationSpeedFrontLeft') 
     .floatle('WheelRotationSpeedFrontRight')
     .floatle('WheelRotationSpeedRearLeft')
     .floatle('WheelRotationSpeedRearRight')
-    .int32('WheelOnRumbleStripFrontLeft') // = 1 when wheel is on rumble strip, = 0 when off.
+    .int32('WheelOnRumbleStripFrontLeft') 
     .int32('WheelOnRumbleStripFrontRight')
     .int32('WheelOnRumbleStripRearLeft')
     .int32('WheelOnRumbleStripRearRight')
-    .floatle('WheelInPuddleDepthFrontLeft') // = from 0 to 1, where 1 is the deepest puddle
+    .floatle('WheelInPuddleDepthFrontLeft') 
     .floatle('WheelInPuddleDepthFrontRight')
     .floatle('WheelInPuddleDepthRearLeft')
     .floatle('WheelInPuddleDepthRearRight')
-    .floatle('SurfaceRumbleFrontLeft') // Non-dimensional surface rumble values passed to controller force feedback
+    .floatle('SurfaceRumbleFrontLeft') 
     .floatle('SurfaceRumbleFrontRight')
     .floatle('SurfaceRumbleRearLeft')
     .floatle('SurfaceRumbleRearRight')
-    .floatle('TireSlipAngleFrontLeft') // Tire normalized slip angle, = 0 means 100% grip and |angle| > 1.0 means loss of grip.
+    .floatle('TireSlipAngleFrontLeft') 
     .floatle('TireSlipAngleFrontRight')
     .floatle('TireSlipAngleRearLeft')
     .floatle('TireSlipAngleRearRight')
-    .floatle('TireCombinedSlipFrontLeft') // Tire normalized combined slip, = 0 means 100% grip and |slip| > 1.0 means loss of grip.
+    .floatle('TireCombinedSlipFrontLeft') 
     .floatle('TireCombinedSlipFrontRight')
     .floatle('TireCombinedSlipRearLeft')
     .floatle('TireCombinedSlipRearRight')
-    .floatle('SuspensionTravelMetersFrontLeft') // Actual suspension travel in meters
+    .floatle('SuspensionTravelMetersFrontLeft') 
     .floatle('SuspensionTravelMetersFrontRight')
     .floatle('SuspensionTravelMetersRearLeft')
     .floatle('SuspensionTravelMetersRearRight')
-    .int32('CarOrdinal') //Unique ID of the car make/model
-    .int32('CarClass') //Between 0 (D -- worst cars) and 7 (X class -- best cars) inclusive
-    .int32('CarPerformanceIndex') //Between 100 (slowest car) and 999 (fastest car) inclusive
-    .int32('DrivetrainType') //Corresponds to EDrivetrainType; 0 = FWD, 1 = RWD, 2 = AWD
-    .int32('NumCylinders') //Number of cylinders in the engine
-    .int32('unknown1')
-    .int32('unknown2')
-    .int32('unknown3')
+    .int32('CarOrdinal') 
+    .int32('CarClass') 
+    .int32('CarPerformanceIndex') 
+    .int32('DrivetrainType') 
+    .int32('NumCylinders') 
+    // --- TUTAJ ZMIANA DLA FH6 ---
+    .uint32('CarGroup')          
+    .floatle('SmashableVelDiff') 
+    .floatle('SmashableMass')    
+    // ----------------------------
     .floatle('PositionX')
     .floatle('PositionY')
     .floatle('PositionZ')
-    .floatle('Speed') // meters per second
-    .floatle('Power') // watts
-    .floatle('Torque') // newton meter
+    .floatle('Speed') 
+    .floatle('Power') 
+    .floatle('Torque') 
     .floatle('TireTempFrontLeft')
     .floatle('TireTempFrontRight')
     .floatle('TireTempRearLeft')
@@ -91,9 +93,8 @@ var forza = new Parser().endianess("little")
     .uint8('HandBrake')
     .uint8('Gear')
     .int8('Steer')
-    .int8('NormalizedDrivingLine')
-    .int8('NormalizedAIBrakeDifference')
-    .int8('unknown4')
+    // --- DOPEŁNIENIE DO 324 BAJTÓW ---
+    .seek(3);
 
 let updates = {}
 
